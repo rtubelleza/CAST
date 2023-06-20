@@ -44,18 +44,16 @@ class GraphSampler. """
     10/5/2023 Changes
     - Added network randomisation by shuffling post-synaptic partners.
 
+    20/07/2023 Changes
+    - Removed default_data method for public release
+    - Remove pre and post normalisation methods due to redundancy with 'relative' method.
+
 """
-def default_data():
-    RT_AUTH_KEY = None # Removed for privacy purposes
-    VNC_c = Client('neuprint-test.janelia.org', dataset='vnc', token=RT_AUTH_KEY)
-    data_wrapper = ConnDF(client=VNC_c)
-    data_wrapper.extract_full(file_path='default') 
-    return data_wrapper
 
 class ConnDF():
     """ Creates an instance of a connectome analysis class, ConnDF. 
     Args:
-        client: neuprint.Client instance; Can be VNC or hemibrain.
+        client: neuprint.Client instance; Can be any connectome dataset from neuPrint. 
     """
     def __init__(self, client):
         self.client = client
@@ -75,6 +73,7 @@ class ConnDF():
         self.df_layer_dict = None #{[1-N]: layer}
         self.df_comm_dict = None
     
+    ## At the moment, setters, no getters. Need to devise a Class coupling/cohesion plan.
     def set_conn_filter(self, df):
         self.conn_filter = df
     
@@ -130,7 +129,7 @@ class ConnDF():
                     'ntUnknownProb', 'lastModifiedBy', 'tosomaPosition', 'position',
                     'synonyms', 'rootSide', 'exitNerve', 'inputRois', 'outputRois'
                     ]
-                ) # Full property list
+                ) # Full metadata property list
                 
         else: # Extract from pickled. outdated. try not to use.
             self.neuron_master = pd.read_pickle(file_path[0])
@@ -330,26 +329,16 @@ class ConnDF():
 
     def normalise(self, df, by='relative'):
         weight_mapping = dict()
-        if by == 'pre': # Normalise; in_weight/total in_weight
-            for n in df['bodyId_pre'].unique():
-                neuron = self.neuron_master[self.neuron_master['bodyId'] == n]
-                total_downstream = neuron['downstream'].values[0]
-                weight_mapping[n] = total_downstream
-            df['weight'] = df['weight']/df['bodyId_pre'].apply(lambda x: weight_mapping[x])
-
-        elif by == 'post': # Normalise; out_weight/total out_weight
-            for n in df['bodyId_post'].unique():
-                neuron = self.neuron_master[self.neuron_master['bodyId'] == n]
-                total_upstream = neuron['upstream'].values[0]
-                weight_mapping[n] = total_upstream
-            df['weight'] = df['weight']/df['bodyId_post'].apply(lambda x: weight_mapping[x])
-        
-        elif by == 'relative': # Pct output to postsynaptic neuron. See AnalyseDF(), premotor extraction example for PMN-MNs
+        if by == 'relative': # Pct output to postsynaptic neuron. See AnalyseDF(), premotor extraction example for PMN-MNs
             post_neurons = df['bodyId_post'].unique()
             pool = self.neuron_master[self.neuron_master['bodyId'].isin(post_neurons)]
             weight_mapping = dict(zip(pool['bodyId'], pool['upstream']))
             df = df.assign(weight = df['weight']/df['bodyId_post'].map(weight_mapping))
-
+        elif by is None:
+            return df
+        else:
+            raise ValueError
+        
         return df
 
     def make_ei(
@@ -446,7 +435,7 @@ class ConnDF():
         make_ei=False, 
         inh_weighting=1, 
         exc_weighting=1,
-        as_csr=True):
+        as_csr=False):
 
         """ Convert connection table to symmetric/square adjacency matrix.
         Args:
