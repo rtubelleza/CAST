@@ -1,5 +1,5 @@
 # Summary
-This a set of Python packages (.py files) useful for the processing, analysis and simulation of datasets from the neuPrint ecosystem (https://neuprint.janelia.org/). This was mainly for a research project, where I explored using the connectome dataset for retrieving premotor and motor neuron clusters, as well as simulating the entire VNC (MANC) as a virtual nervous system, generating in-silico data. The script used for simulations under many parameters and settings are found in param_search.py.
+This a set of Python packages (.py files) useful for the processing, analysis and simulation of datasets from the neuPrint ecosystem (https://neuprint.janelia.org/). This was mainly for a research project, where I explored using the connectome dataset for retrieving premotor and motor neuron clusters, as well as simulated the entire VNC (MANC) as a virtual nervous system, generating in-silico data. The script used for simulations under many parameters and settings are found in param_search.py.
 
 Documentation for classes within the packages are a current work in progress.
 

@@ -1,0 +1,6 @@
+name: cast_environment
+channels:
+  - conda-forge
+  - pip
+  - defaults
+prefix: /Users/rtube/opt/anaconda3/envs/cast_environment
