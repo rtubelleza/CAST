@@ -62,6 +62,9 @@ from ipywidgets import interact_manual
     
     24/5/2023 Changes
     - Renamed AnalyseDF to ClusterDF
+
+    20/06/2023 Changes
+    - Accomodates nomenclature changes to neuron classes; mainly decapitalisation.
 """
 
 class ClusterDF():
@@ -98,7 +101,7 @@ class ClusterDF():
         ## Helper function from neuprint.utils to convert table to matrix
         
         # MN Pool
-        mn_pool = self.conndf.neuron_master[self.conndf.neuron_master['class'] == 'Motor neuron']
+        mn_pool = self.conndf.neuron_master[self.conndf.neuron_master['class'] == 'motor neuron']
         selected_mn_pool = mn_pool.copy().query(f"somaSide == '{side}' & somaNeuromere == '{neuromere}'")
         # Connections to MN pool
         PMN_MN_cnx = self.conndf.conn_master[self.conndf.conn_master['bodyId_post'].isin(selected_mn_pool.bodyId)]
@@ -369,7 +372,7 @@ class ClusterDF():
         pct_cbar.outline.set_visible(False)
         plt.show()
 
-    def get_vnc_roi_meshes(self, offline=True):
+    def get_vnc_roi_meshes(self, offline=False):
         if offline:
             if 'ACCEPTED_ROIS.pkl' in os.listdir():
                 with open('ACCEPTED_ROIS.pkl', 'rb') as f:
@@ -507,12 +510,12 @@ class ClusterDF():
             gr.nodes[v]['transmitter'] = ['Glutamate', 'Gaba', 'Acetylcholine'][idx] 
             # Class Assignment
             if self.transpose:
-                if data['class'] == 'Motor neuron':
+                if data['class'] == 'motor neuron':
                     gr.nodes[v]['layer'] = 2
                 else:
                     gr.nodes[v]['layer'] = 1
             else:
-                if data['class'] == 'Motor neuron':
+                if data['class'] == 'motor neuron':
                     gr.nodes[v]['layer'] = 1
                 else:
                     gr.nodes[v]['layer'] = 2
@@ -1332,7 +1335,7 @@ class SummaryDF():
         """ Summary table for motor neuron numbers per neuromere, side and value. """
         soma_df = self.conndf.neuron_master.copy()
         # Motor neurons only
-        soma_df = soma_df[soma_df['class'] == 'Motor neuron']
+        soma_df = soma_df[soma_df['class'] == 'motor neuron']
         # Multilevel index. By T and by Side. Then count motor neurons only.
         soma_df = soma_df.groupby(['somaNeuromere', 'somaSide'])['exitNerve'].value_counts()#apply(lambda x: x[x == 'Motor neuron'])
         # Exclude A neuromeres. and midline
